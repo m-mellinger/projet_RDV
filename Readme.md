@@ -8,4 +8,7 @@ cd build
 cmake ..  
 make
 ```
-L'execution du programme peut prendre plusieurs minutes.
+```
+./tinyraytracer
+```
+L'execution du programme peut prendre plusieurs minutes (à cause du parcours des polygones du canard).
