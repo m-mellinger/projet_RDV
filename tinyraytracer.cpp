@@ -56,7 +56,7 @@ struct Sphere {
     }
 };
 
-
+std::vector<Sphere> death_star;
 
 Vec3f reflect(const Vec3f &I, const Vec3f &N) {
     return I - N*2.f*(I*N);
@@ -93,6 +93,36 @@ bool scene_intersect(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphe
         }
     }
 
+    // Intersection avec la death star
+    float dist_i;
+    if (death_star[0].ray_intersect(orig, dir, dist_i) && dist_i < spheres_dist)
+    {
+        float d = sqrt(pow(death_star[1].center.x-(orig + dir*dist_i).x,2) + pow(death_star[1].center.y-(orig + dir*dist_i).y,2) + pow(death_star[1].center.z-(orig + dir*dist_i).z,2));
+        if (d >= death_star[1].radius)
+        {
+            spheres_dist = dist_i;
+            hit = orig + dir*dist_i;
+            N = (hit - death_star[0].center).normalize();
+            material = death_star[0].material;
+        }
+        else{
+            spheres_dist = dist_i;
+            hit = orig + dir*dist_i;
+            N = (hit - death_star[1].center).normalize();
+            material = death_star[1].material;
+        }
+    }
+    if (death_star[1].ray_intersect(orig, dir, dist_i) && dist_i < spheres_dist)
+    {
+        float d = sqrt(pow(death_star[0].center.x-(orig + dir*dist_i).x,2) + pow(death_star[0].center.y-(orig + dir*dist_i).y,2) + pow(death_star[0].center.z-(orig + dir*dist_i).z,2));
+        if (d <= death_star[0].radius)
+        {
+            spheres_dist = dist_i;
+            hit = orig + dir*dist_i;
+            N = (-hit + death_star[1].center).normalize();
+            material = death_star[1].material;
+        }
+    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     float checkerboard_dist = std::numeric_limits<float>::max();
@@ -214,7 +244,8 @@ int main() {
     Material      glass(1.5, Vec4f(0.0,  0.5, 0.1, 0.8), Vec3f(0.6, 0.7, 0.8),  125.);
     Material red_rubber(1.0, Vec4f(0.9,  0.1, 0.0, 0.0), Vec3f(0.3, 0.1, 0.1),   10.);
     Material     mirror(1.0, Vec4f(0.0, 10.0, 0.8, 0.0), Vec3f(1.0, 1.0, 1.0), 1425.);
-
+    Material deathStarMaterial(1.0, Vec4f(0.6,  0.0, 0.0, 0.0), Vec3f(0.15, 0.15, 0.15),   10.);
+    Material interiorDeathStar(1.0, Vec4f(0.3,  0.1, 0.1, 0.0), Vec3f(0.9, 0.9, 0.9),   10.);
 
     std::vector<Sphere> spheres;
     spheres.push_back(Sphere(Vec3f(-3,    0,   -16), 2,      ivory));
@@ -227,7 +258,8 @@ int main() {
     lights.push_back(Light(Vec3f( 30, 50, -25), 1.8));
     lights.push_back(Light(Vec3f( 30, 20,  30), 1.7));
 
-
+    death_star.push_back(Sphere(Vec3f(-1,    6,   -16), 3,      deathStarMaterial));
+    death_star.push_back(Sphere(Vec3f( 2,    7,   -13), 2,      interiorDeathStar));
 
     render(spheres, lights);
 
